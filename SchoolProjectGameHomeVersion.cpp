@@ -1,8 +1,15 @@
-#include <iostream>
-#include <string>
-#include <random>
-#include <thread>
-#include <fstream>
+/*
+LF6 - Project
+Stylianos & Mykola
+Dungeon-RPG-Game
+[TEXT-BASED/TERMINAL GAME]
+*/
+
+#include <iostream> //For Input/Output Stream
+#include <string> //For handling strings
+#include <random> //For use of random numbers
+#include <thread>//For the sleep function
+#include <fstream>//For file handling(NOT USED IN THIS VERSION, CODEBLOCKS HAS TO BE SETUP PROPERLY IN ORDER FOR FILE HANDLING TO WORK AND I DON'T HAVE TIME FOR THAT)
 using std::endl;
 using std::string;
 
@@ -215,3 +222,11 @@ int main() {
 
     return 0; //end
 } //main
+
+
+
+/*
+About usage of AI software for this project:
+- Copilot was used to explain how the thread library works
+- Copilot was used once again to explain how classes work in C++
+*/
