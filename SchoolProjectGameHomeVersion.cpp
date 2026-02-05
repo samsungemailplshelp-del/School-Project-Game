@@ -1,79 +1,116 @@
-/*
-    Dungeon RPG game - Text/Terminal/Console only! - LF6 Project
-    By Mykola & Stylianos
-    WI25
-*/
-
-//libraries
-#include <iostream> //Standard input output stream MUST
-#include <thread> //used for the sleep part of the code (Replacable)
-#include <string> //used for string (Replacable)
-#include <fstream> //used to check text files for information on the players Data & NPC Data
-
-//headers
-    /*-------------*/
+#include <iostream>
+#include <string>
+#include <random>
+#include <thread>
+#include <fstream>
+using std::endl;
+using std::string;
 
 
-//functions | voids
-    /*-------------*/
-
-
-
-
-int main() //Main
-{
-    //Variables
-    bool gameIsRunning = true; //Game looping bool | if it turns to false the program ends
-
-    //Classes
-    class Player
-    {
+class Player {
     public:
-        std::string PlayerName;
-        float maxhp;
+        string name;
+        int Maxhp;
         float hp;
-        float basedmg;
-        float dmg;
+        float attack;
         float defense;
+        int level;
+        int exp;
+        int gold;
         int status;
+}; //Player class
 
-            bool loadFromFile(const std::string& filename)
-            {
-                std::ifstream file(filename);
-
-                if (!file.is_open()) //FOR MYKOLA: the '!' before the file.is_open() means if the file is NOT open!
-                {
-                    return false; //failed to open the file
-                }
-
-                std::getline(file, PlayerName);
-                file >> maxhp;
-                file >> hp;
-                file >> basedmg;
-                file >> dmg;
-                file >> defense;
-                file >> status;
-
-                file.close();
-                return true;
-            }
-    }; //Player class
-
-    class Enemy
-    {
+class NPC {
     public:
-        std::string EnemyName = Evil_Larry;
-        float maxhp;
+        string npcname;
+        int Maxhp;
         float hp;
-        float basedmg;
-        float dmg;
+        float attack;
         float defense;
-        bool status;
-    }; //Enemy class
+        int level;
+        int status;
+}; //NPC class
 
-    while(gameIsRunning)
-    {
-        //Variables Necessary for the Game's Main Menu
+Player player;
+NPC basicEnemy;
+
+void fight() {
+    bool Playerturn = true;
+    bool Enemyturn = false;
+    bool SomeoneRun = false;
+    bool Playerdefending = false;
+    while(player.hp > 0 && basicEnemy.hp > 0 && SomeoneRun == false) {
+        float Fdmgdlt = (player.attack / basicEnemy.defense);
+        if(Playerturn) {
+            int playerchoice;
+            std::cout<<"choose your action: "<<endl;
+            std::cout<<"1. Attack"<<endl;
+            std::cout<<"2. Defend"<<endl;
+            std::cout<<"3. Run"<<endl;
+            std::cin>>playerchoice;
+
+            switch(playerchoice) {
+                case 1: //Attack
+                    basicEnemy.hp -= Fdmgdlt;
+                    std::cout<<"you dealt "<<Fdmgdlt<<" damage to "<<basicEnemy.npcname<<"."<<endl;
+                    std::cout<<"Enemy HP: "<<basicEnemy.hp<<endl;
+                    Playerturn = false;
+                    Enemyturn = true;
+                    break;
+                case 2: //Defend
+                    std::cout<<"You brace yourself for the next attack."<<endl;
+                    Playerdefending = true;
+                    Playerturn = false;
+                    Enemyturn = true;
+                    break;
+                case 3: //Run
+                    std::cout<<"You fled from the battle!"<<endl;
+                    SomeoneRun = true;
+                    break;
+                default:
+                    std::cout<<"Invalid choice, try again!"<<endl;
+                    break;
+        }//PlayerTurn switch
+    }//Playerturn
+        if(Enemyturn){
+            if(Playerdefending){
+                float Edmgdlt = (basicEnemy.attack / player.defense) / 2; //Defending reduces damage by half
+                player.hp -= Edmgdlt;
+                std::cout<<basicEnemy.npcname<<" dealt "<<Edmgdlt<<" damage to you."<<endl;
+                std::cout<<"Your HP: "<<player.hp<<endl;
+                Playerdefending = false; //Reset defending status after enemy turn
+                Enemyturn = false;
+                Playerturn = true;
+            }//Enemy Attack (DEFEND)
+            else {
+                float Edmgdlt = (basicEnemy.attack / player.defense);
+                player.hp -= Edmgdlt;
+                std::cout<<basicEnemy.npcname<<" dealt "<<Edmgdlt<<" damage to you."<<endl;
+                std::cout<<"Your HP: "<<player.hp<<endl;
+                Enemyturn = false;
+                Playerturn = true;
+            }//Enemy Attack (NORMAL)
+        }//Enemyturn
+    } //while fight
+    if (player.hp <= 0 ) {
+        std::cout<<"You have been defeated..."<<endl;
+        player.status = 0;
+    } //Game Over
+    else if (basicEnemy.hp <= 0) {
+        std::cout<<"You have defeated "<<basicEnemy.npcname<<"!"<<endl;
+        player.exp += 20;
+        player.gold += 10;
+        std::cout<<"You gained 20 EXP and 10 Gold."<<endl;
+    } //Victory
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    system("cls");
+} //fight
+
+int main() {
+    bool gameIsRunning = true; //game loop control variable
+
+    while(gameIsRunning) {
+             //Variables Necessary for the Game's Main Menu
     bool mainMenu0 = true; //game loop
     bool WelcomeMSG = true; //welcome message pop-up
     bool MainMenuQuestion = true; //start|quit question
@@ -129,7 +166,7 @@ int main() //Main
                     std::cout<<"\nSuccessfully quit\n\n";
                     mainMenu0 = false; //stops the main menu cycle
                     gameIsRunning = false; //ENDS THE GAME!!!
-                    break;
+                    return 0; //HARD EXIT BC continue; DIDN'T WORK!
 
                     //False Input Error
                 default:
@@ -147,8 +184,34 @@ int main() //Main
             std::cout<<"Presenting [PLACEHOLDER] by Mykola & Stylianos\n"; //Intro
         }
 
+        //SETTING UP CLASS INFO HERE MANUALLY!!!
+            //basicEnemy
+        basicEnemy.npcname = "Goblin";
+        basicEnemy.Maxhp = 50;
+        basicEnemy.hp = 50.0f;
+        basicEnemy.attack = 5.0f;
+        basicEnemy.defense = 1.0f;
+        basicEnemy.level = 1;
 
-        return 0; //return 0
+            //player
+        player.Maxhp = 100;
+        player.hp = 100.0f;
+        player.attack = 10.0f;
+        player.defense = 1.0f;
+        player.level = 1;
+        player.exp = 0;
+        player.gold = 0;
 
-    }//gameIsRunning conditions + loop start
+        //game combat test & start
+        std::cout<<"choose your character name: ";
+        std::cin>>player.name;
+        std::cout<<"hello, "<<player.name<<", good luck on your adventure!"<<endl;
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        system("cls");
+        fight();
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        system("cls");
+    }//gameloop
+
+    return 0; //end
 } //main
